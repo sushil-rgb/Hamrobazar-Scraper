@@ -1,4 +1,3 @@
-from statistics import harmonic_mean
 from tools_oop import HamrobazarScraper
 import pandas as pd
 import winsound
