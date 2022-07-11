@@ -67,13 +67,13 @@ class HamrobazarScraper:
         body_page = WebDriverWait(driver, 10).until((EC.presence_of_element_located((By.TAG_NAME, 'body'))))
         
         # For product links:
-        product_links = WebDriverWait(driver, 10).until((EC.presence_of_all_elements_located((By.CLASS_NAME, 'product-redirect'))))
+        product_links = WebDriverWait(driver, 10).until((EC.visibility_of_all_elements_located((By.CLASS_NAME, 'product-redirect'))))
         # For price:
-        listed_prices = WebDriverWait(driver, 10).until((EC.presence_of_all_elements_located((By.CLASS_NAME, 'price--main'))))
+        listed_prices = WebDriverWait(driver, 10).until((EC.visibility_of_all_elements_located((By.CLASS_NAME, 'price--main'))))
         
         # Storing all the scraped links, names and price to a list:
-        all_product_links = [WebDriverWait(links, 10).until((EC.presence_of_element_located((By.TAG_NAME, 'a')))).get_attribute('href') for links in product_links]
-        all_product_names = [WebDriverWait(names, 10).until((EC.presence_of_element_located((By.TAG_NAME, 'a')))).text.strip() for names in product_links]
+        all_product_links = [WebDriverWait(links, 10).until((EC.visibility_of_element_located((By.TAG_NAME, 'a')))).get_attribute('href') for links in product_links]
+        all_product_names = [WebDriverWait(names, 10).until((EC.visibility_of_element_located((By.TAG_NAME, 'a')))).text.strip() for names in product_links]
         all_product_prices = [price.text.strip() for price in listed_prices]
 
 
@@ -81,25 +81,24 @@ class HamrobazarScraper:
         last_height = driver.execute_script("return document.body.scrollHeight")
         while True:                                 
             try:                
-                driver.execute_script("window.scrollTo(5, document.body.scrollHeight);")
+                driver.execute_script("window.scrollTo(3, document.body.scrollHeight);")
                 driver.implicitly_wait(10)
-                sleep(interval)
-                product_links1 = WebDriverWait(driver, 10).until((EC.presence_of_all_elements_located((By.CLASS_NAME, 'product-redirect'))))
+                sleep(self.interval)
+                product_links1 = WebDriverWait(driver, 10).until((EC.visibility_of_all_elements_located((By.CLASS_NAME, 'product-redirect'))))
                 # For price:
-                listed_prices1 = WebDriverWait(driver, 10).until((EC.presence_of_all_elements_located((By.CLASS_NAME, 'price--main'))))
+                listed_prices1 = WebDriverWait(driver, 10).until((EC.visibility_of_all_elements_located((By.CLASS_NAME, 'price--main'))))
                 
                 # Again looping and appending to the existing variable and lists above:
                 for link in product_links1:
-                    links_hyper = WebDriverWait(link, 10).until((EC.presence_of_element_located((By.TAG_NAME, 'a')))).get_attribute('href')
+                    links_hyper = WebDriverWait(link, 10).until((EC.visibility_of_element_located((By.TAG_NAME, 'a')))).get_attribute('href')
                     all_product_links.append(links_hyper)
-                    product_names = WebDriverWait(link, 10).until((EC.presence_of_element_located((By.TAG_NAME, 'a')))).text.strip()
+                    product_names = WebDriverWait(link, 10).until((EC.visibility_of_element_located((By.TAG_NAME, 'a')))).text.strip()
                     all_product_names.append(product_names)
                     print(product_names)
                 
                 for prices in listed_prices1:
                     all_product_prices.append(prices.text.strip())
 
-                
                 # Comparing new height to a last height (i.e Footer):
                 new_height = driver.execute_script("return document.body.scrollHeight")
                 # If the new height is equal to the footer height, the loops break:
@@ -123,7 +122,6 @@ class HamrobazarScraper:
         driver.maximize_window()
         driver.get(self.url)
         
-        print("Scraping category.\n-------------------------------- ")
         WebDriverWait(driver, 10).until((EC.presence_of_element_located((By.TAG_NAME, 'body'))))
         name = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'search--titles'))).text.strip().replace("Category : ", "")
 

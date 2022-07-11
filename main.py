@@ -5,28 +5,27 @@ import winsound
 import time
 
 # main URL:
-hamrobazar_url = "https://hamrobazaar.com/category/hb-select/00000000-0000-0000-0000-000000000000"
+hamrobazar_url = "https://hamrobazaar.com/category/televisions/321b7a06-08fa-430b-8ad7-24cb2b9e82ad/17af79ea-106b-4c8c-b8ef-4d2fe7d9de9c"
 
 # Track the timer:
 start_time = time.time()
 
 
-# Time interval between each request made to the server. Set the default value to 2 seconds:
-# Decrease the time interval if you want a bit faster scraping, however I discourage you to do so as it may hurt the server:
-time_interval = 1
+# Time interval between each request made to the server. i"ve set the default value to 5 seconds:
+# Decrease the time interval if you want a bit faster scraping, however I discourage you to do so as it may hurt the server or may throw an error:
+time_interval = 5
 
 
 category_name = HamrobazarScraper(hamrobazar_url).category_name()
-print(f"Category | {category_name}\n-----------")
+print(f"Category | {category_name}\n--------------------------------")
 hamrobazar = HamrobazarScraper(hamrobazar_url).hamrobazar_automation(time_interval)
-print(hamrobazar[0])
 
 
 # Extracting to Json and Excel via Pandas dataframe:
 d = {'Names': hamrobazar[0], "Prices": hamrobazar[1], "Links": hamrobazar[-1]}
 df = pd.DataFrame(data=d)
-df.to_json(f"{category_name}.json", indent=4)
-df.to_excel(f"{category_name}.xlsx", index=False)
+df.to_json(f"Sample Hamrobazar {category_name} database.json", indent=4)
+df.to_excel(f"Sample Hamrobazar {category_name} database.xlsx", index=False)
 
 
 # Play the sound after the completion of Scraping process:
