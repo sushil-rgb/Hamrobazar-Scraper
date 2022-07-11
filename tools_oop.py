@@ -86,14 +86,14 @@ class HamrobazarScraper:
                 
                 for link in product_links1:
                     links_hyper = WebDriverWait(link, 10).until((EC.presence_of_element_located((By.TAG_NAME, 'a')))).get_attribute('href')
-                    all_product_links.extend(links_hyper)
+                    all_product_links.append(links_hyper)
                     product_names = WebDriverWait(link, 10).until((EC.presence_of_element_located((By.TAG_NAME, 'a')))).text.strip()
-                    all_product_names.extend(product_names)
+                    all_product_names.append(product_names)
                     print(product_names)
 
                 
                 for prices in listed_prices1:
-                    all_product_prices.extend(prices.text.strip())
+                    all_product_prices.append(prices.text.strip())
 
                     
                 new_height = driver.execute_script("return document.body.scrollHeight")
