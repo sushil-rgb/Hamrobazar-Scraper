@@ -54,21 +54,19 @@ class HamrobazarScraper:
         for arg in self.selenium_arguments:
             self.opt.add_argument(arg)
         
-        
-    def hamrobazar_automation(self, interval):
-        self.interval = interval       
         self.opt.headless = True
+        self.driver = webdriver.Chrome(service=self.path, options=self.opt)
+        self.driver.maximize_window()
+        self.driver.get(self.url)
 
-        driver = webdriver.Chrome(service=self.path, options=self.opt) 
-        driver.maximize_window()
-        driver.get(self.url)     
-       
-        body_page = WebDriverWait(driver, 10).until((EC.presence_of_element_located((By.TAG_NAME, 'body'))))
+
+    def hamrobazar_automation(self, interval):
+        body_page = WebDriverWait(self.driver, 10).until((EC.presence_of_element_located((By.TAG_NAME, 'body'))))
         
         # For product links:
-        product_links = WebDriverWait(driver, 10).until((EC.visibility_of_all_elements_located((By.CLASS_NAME, 'product-redirect'))))
+        product_links = WebDriverWait(self.driver, 10).until((EC.visibility_of_all_elements_located((By.CLASS_NAME, 'product-redirect'))))
         # For price:
-        listed_prices = WebDriverWait(driver, 10).until((EC.visibility_of_all_elements_located((By.CLASS_NAME, 'price--main'))))
+        listed_prices = WebDriverWait(self.driver, 10).until((EC.visibility_of_all_elements_located((By.CLASS_NAME, 'price--main'))))
         
         # Storing all the scraped links, names and price to a list:
         all_product_links = [WebDriverWait(links, 10).until((EC.visibility_of_element_located((By.TAG_NAME, 'a')))).get_attribute('href') for links in product_links]
@@ -77,16 +75,16 @@ class HamrobazarScraper:
 
 
         # Get scroll height after first time page load:
-        last_height = driver.execute_script("return document.body.scrollHeight")
+        last_height = self.driver.execute_script("return document.body.scrollHeight")
         while True:                                 
             try:
                 # Scroll down to bottom:                
-                driver.execute_script("window.scrollTo(3, document.body.scrollHeight);")
+                self.driver.execute_script("window.scrollTo(3, document.body.scrollHeight);")
                 # Wait to load page:                
                 sleep(self.interval)
-                product_links1 = WebDriverWait(driver, 10).until((EC.visibility_of_all_elements_located((By.CLASS_NAME, 'product-redirect'))))
+                product_links1 = WebDriverWait(self.driver, 10).until((EC.visibility_of_all_elements_located((By.CLASS_NAME, 'product-redirect'))))
                 # For price:
-                listed_prices1 = WebDriverWait(driver, 10).until((EC.visibility_of_all_elements_located((By.CLASS_NAME, 'price--main'))))
+                listed_prices1 = WebDriverWait(self.driver, 10).until((EC.visibility_of_all_elements_located((By.CLASS_NAME, 'price--main'))))
                 
                 # Again looping and appending to the existing variable and lists above:
                 for link in product_links1:
@@ -100,7 +98,7 @@ class HamrobazarScraper:
                     all_product_prices.append(prices.text.strip())
 
                 # Calculate new scroll height and compare with last scroll height:
-                new_height = driver.execute_script("return document.body.scrollHeight")                
+                new_height = self.driver.execute_script("return document.body.scrollHeight")                
                 if new_height == last_height:
                     break
                 last_height = new_height
@@ -109,22 +107,16 @@ class HamrobazarScraper:
                 break
         
         sleep(2)
-        driver.quit()
+        self.driver.quit()
         
         return all_product_names, all_product_prices, all_product_links
     
 
     def category_name(self):
-        self.opt.headless = True
-        driver = webdriver.Chrome(service=self.path, options=self.opt)
+        WebDriverWait(self.driver, 10).until((EC.presence_of_element_located((By.TAG_NAME, 'body'))))
+        name = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'search--titles'))).text.strip().replace("Category : ", "")
 
-        driver.maximize_window()
-        driver.get(self.url)
-        
-        WebDriverWait(driver, 10).until((EC.presence_of_element_located((By.TAG_NAME, 'body'))))
-        name = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'search--titles'))).text.strip().replace("Category : ", "")
-
-        driver.quit()
+        self.driver.quit()
         return name
 
 
@@ -167,16 +159,16 @@ class Hamrobazaar:
     
     def seller_name(self):
         try:
-            name = self.driver.find_element(By.CLASS_NAME, 'seller__name--inner').find_element(By.TAG_NAME, 'a').find_element(By.TAG_NAME, 'span').text.strip()
+            s_name = self.driver.find_element(By.CLASS_NAME, 'seller__name--inner').find_element(By.TAG_NAME, 'a').find_element(By.TAG_NAME, 'span').text.strip()
             sleep(2)
             self.driver.quit()
 
-            return name
+            return s_name
         except TimeoutException:
             sleep(2)
             self.driver.quit()
 
-            return name
+            return s_name
 
 
     def seller_contact(self):
