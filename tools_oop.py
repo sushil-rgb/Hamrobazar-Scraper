@@ -1,3 +1,4 @@
+from multiprocessing import Condition
 from bs4 import BeautifulSoup
 import requests
 from selenium import webdriver
@@ -34,9 +35,8 @@ def get_user_agent():
     return random.choice(ua_strings)
 
 
+# This class extracts only products' links, name and prices from the main category url:
 class HamrobazarScraper:
-
-
     def __init__(self, url):
         self.headers = {'User-Agent':get_user_agent()}
         self.url = url
@@ -77,12 +77,13 @@ class HamrobazarScraper:
         all_product_prices = [price.text.strip() for price in listed_prices]
 
 
-        # This logic scrolls till the end, however the script fails to scrape few remaining datas at the end:
+        # Get scroll height after first time page load:
         last_height = driver.execute_script("return document.body.scrollHeight")
         while True:                                 
-            try:                
+            try:
+                # Scroll down to bottom:                
                 driver.execute_script("window.scrollTo(3, document.body.scrollHeight);")
-                driver.implicitly_wait(10)
+                # Wait to load page:                
                 sleep(self.interval)
                 product_links1 = WebDriverWait(driver, 10).until((EC.visibility_of_all_elements_located((By.CLASS_NAME, 'product-redirect'))))
                 # For price:
@@ -99,9 +100,8 @@ class HamrobazarScraper:
                 for prices in listed_prices1:
                     all_product_prices.append(prices.text.strip())
 
-                # Comparing new height to a last height (i.e Footer):
-                new_height = driver.execute_script("return document.body.scrollHeight")
-                # If the new height is equal to the footer height, the loops break:
+                # Calculate new scroll height and compare with last scroll height:
+                new_height = driver.execute_script("return document.body.scrollHeight")                
                 if new_height == last_height:
                     break
                 last_height = new_height
@@ -127,3 +127,99 @@ class HamrobazarScraper:
 
         driver.quit()
         return name
+
+
+# This class extracts the products' name, seller info, prices and so on from individual links:
+class Hamrobazaar:
+    def __init__(self, url):
+        self.headers = {'User-Agent':get_user_agent()}
+        self.url = url
+        self.req = requests.get(url, headers=self.headers)
+
+        # Setting up the Selenium driver:
+        self.opt = Options()
+        self.path = Service('c:\\users\\chromedriver.exe')        
+        self.selenium_arguments = [f"user-agent= {self.headers}", "window-size=1400,900", '--silent', '--no-sandbox', 'disable-notifications', '--disable-dev-shm-usage', '--disable-gpu']
+        
+        # Running the Selenium driver:
+        self.opt.add_experimental_option('detach', True)
+        self.opt.add_experimental_option('excludeSwitches', ['enable-logging'])
+
+        # Mimicking as a client while making a request to server:
+        for arg in self.selenium_arguments:
+            self.opt.add_argument(arg)
+
+        self.opt.headless = True
+        self.driver = webdriver.Chrome(service=self.path, options=self.opt)
+        self.driver.maximize_window()
+        self.driver.get(self.url)
+        
+
+    def product_name(self):
+        try:
+            name = WebDriverWait(self.driver, 10).until((EC.visibility_of_element_located((By.CLASS_NAME, 'title--relative')))).text.strip()
+            sleep(2)
+            self.driver.quit()
+            return name
+        except TimeoutException:
+            sleep(2)
+            self.driver.quit()
+
+    
+    def seller_name(self):
+        try:
+            name = self.driver.find_element(By.CLASS_NAME, 'seller__name--inner').find_element(By.TAG_NAME, 'a').find_element(By.TAG_NAME, 'span').text.strip()
+            sleep(2)
+            self.driver.quit()
+
+            return name
+        except TimeoutException:
+            sleep(2)
+            self.driver.quit()
+
+            return name
+
+
+    def seller_contact(self):
+        try:
+            contact = self.driver.find_element(By.CLASS_NAME, 'seller__address').find_element(By.TAG_NAME, 'span').text.strip()
+            sleep(2)
+            self.driver.quit()
+
+            return contact
+        except NoSuchElementException:
+            contact = "Not available"
+            sleep(2)
+            self.driver.quit()
+
+            return contact
+
+
+    def seller_link(self):
+        try:
+            link = self.driver.find_element(By.CLASS_NAME, 'seller__name--inner').find_element(By.TAG_NAME, 'a').get_attribute('href')
+            sleep(2)
+            self.driver.quit()
+
+            return link
+        except NoSuchElementException:
+            link = "Not available"
+            sleep(2)
+            self.driver.quit()
+
+            return link
+    
+
+    def product_condition(self):
+        try:
+            condition = self.driver.find_element(By.XPATH, '//*[@id="hb__root"]/div/main/div/aside[1]/div/div[1]/label').text.strip()
+            sleep(2)
+            self.driver.quit()
+
+            return condition
+        except NoSuchElementException:
+            condition = "N/A"
+            sleep(2)
+            self.driver.quit()
+            
+            return condition

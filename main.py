@@ -1,11 +1,11 @@
 from statistics import harmonic_mean
-from tools_oop import HamrobazarScraper
+from tools_oop import HamrobazarScraper, Hamrobazaar
 import pandas as pd
 import winsound
 import time
 
 # main URL:
-hamrobazar_url = "https://hamrobazaar.com/category/televisions/321b7a06-08fa-430b-8ad7-24cb2b9e82ad/17af79ea-106b-4c8c-b8ef-4d2fe7d9de9c"
+hamrobazar_url = "https://hamrobazaar.com/category/computers-peripherals/4cce4a7c-431b-474d-8b58-4fd2ddc191cf"
 
 # Track the timer:
 start_time = time.time()
@@ -21,11 +21,13 @@ print(f"Category | {category_name}\n--------------------------------")
 hamrobazar = HamrobazarScraper(hamrobazar_url).hamrobazar_automation(time_interval)
 
 
-# Extracting to Json and Excel via Pandas dataframe:
+# # Extracting to Json and Excel via Pandas dataframe:
+# Index 0 extracts products' name, 1 extracts products' link and -1 (last index) extracts products' links:
 d = {'Names': hamrobazar[0], "Prices": hamrobazar[1], "Links": hamrobazar[-1]}
 df = pd.DataFrame(data=d)
 df.to_json(f"Sample Hamrobazar {category_name} database.json", indent=4)
 df.to_excel(f"Sample Hamrobazar {category_name} database.xlsx", index=False)
+
 
 
 # Play the sound after the completion of Scraping process:
