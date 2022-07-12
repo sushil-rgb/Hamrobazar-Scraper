@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-from statistics import harmonic_mean
 from tools_oop import HamrobazarScraper, Hamrobazaar
-=======
-from tools_oop import HamrobazarScraper
->>>>>>> c57be8bc94be7c6d2a12b67d56d2690890a9cdb3
 import pandas as pd
 import winsound
 import time

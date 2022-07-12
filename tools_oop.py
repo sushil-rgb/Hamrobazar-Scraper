@@ -1,4 +1,3 @@
-from multiprocessing import Condition
 from bs4 import BeautifulSoup
 import requests
 from selenium import webdriver
