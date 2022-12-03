@@ -15,22 +15,8 @@ import random
 
 # Get random user-agent for scraping:
 def get_user_agent():
-    ua_strings = [
-        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/28.0.1500.72 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10) AppleWebKit/600.1.25 (KHTML, like Gecko) Version/8.0 "
-        "Safari/600.1.25",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:33.0) Gecko/20100101 Firefox/33.0",
-        "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 "
-        "Safari/537.36",
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/600.1.17 (KHTML, like Gecko) Version/7.1 "
-        "Safari/537.85.10",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko",
-        "Mozilla/5.0 (Windows NT 6.3; WOW64; rv:33.0) Gecko/20100101 Firefox/33.0",
-        "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.104 Safari/537.36"
-    ]
-
+    with open('user-agents.txt') as f:
+        ua_strings = f.read().split("\n")
     return random.choice(ua_strings)
 
 
@@ -55,14 +41,14 @@ class HamrobazarScraper:
         for arg in self.selenium_arguments:
             self.opt.add_argument(arg)
 
-
     def hamrobazar_automation(self, interval):
         self.opt.headless = True
         driver = webdriver.Chrome(service=self.path, options=self.opt)
         driver.maximize_window()
         driver.get(self.url)
 
-        body_page = WebDriverWait(driver, 10).until((EC.presence_of_element_located((By.TAG_NAME, 'body'))))
+        body_page = WebDriverWait(driver, 10).until(
+            (EC.presence_of_element_located((By.TAG_NAME, 'body'))))
 
         # For product links:
         product_links = WebDriverWait(driver, 10).until(
@@ -73,7 +59,8 @@ class HamrobazarScraper:
 
         # Storing all the scraped links, names and price to a list:
         all_product_links = [
-            WebDriverWait(links, 10).until((EC.visibility_of_element_located((By.TAG_NAME, 'a')))).get_attribute('href')
+            WebDriverWait(links, 10).until(
+                (EC.visibility_of_element_located((By.TAG_NAME, 'a')))).get_attribute('href')
             for links in product_links]
         all_product_names = [
             WebDriverWait(names, 10).until((EC.visibility_of_element_located((By.TAG_NAME, 'a')))).text.strip() for
@@ -81,11 +68,13 @@ class HamrobazarScraper:
         all_product_prices = [price.text.strip() for price in listed_prices]
 
         # Get scroll height after first time page load:
-        last_height = driver.execute_script("return document.body.scrollHeight")
+        last_height = driver.execute_script(
+            "return document.body.scrollHeight")
         while True:
             try:
                 # Scroll down to bottom:
-                driver.execute_script("window.scrollTo(3, document.body.scrollHeight);")
+                driver.execute_script(
+                    "window.scrollTo(3, document.body.scrollHeight);")
                 # Wait to load page:
                 sleep(interval)
                 product_links1 = WebDriverWait(driver, 10).until(
@@ -108,7 +97,8 @@ class HamrobazarScraper:
                     all_product_prices.append(prices.text.strip())
 
                 # Calculate new scroll height and compare with last scroll height:
-                new_height = driver.execute_script("return document.body.scrollHeight")
+                new_height = driver.execute_script(
+                    "return document.body.scrollHeight")
                 if new_height == last_height:
                     break
                 last_height = new_height
@@ -127,8 +117,10 @@ class HamrobazarScraper:
         driver.maximize_window()
         driver.get(self.url)
 
-        WebDriverWait(driver, 10).until((EC.presence_of_element_located((By.TAG_NAME, 'body'))))
-        name = WebDriverWait(driver, 10).until((EC.presence_of_element_located((By.CLASS_NAME, 'search--titles')))).text.strip().replace("Category : ", "")
+        WebDriverWait(driver, 10).until(
+            (EC.presence_of_element_located((By.TAG_NAME, 'body'))))
+        name = WebDriverWait(driver, 10).until((EC.presence_of_element_located(
+            (By.CLASS_NAME, 'search--titles')))).text.strip().replace("Category : ", "")
 
         driver.quit()
         return name
@@ -174,7 +166,7 @@ class Hamrobazaar:
     def seller_name(self):
         try:
             s_name = self.driver.find_element(By.CLASS_NAME, 'seller__name--inner').find_element(By.TAG_NAME,
-                                                                                               'a').find_element(
+                                                                                                 'a').find_element(
                 By.TAG_NAME, 'span').text.strip()
             sleep(2)
             self.driver.quit()
@@ -230,4 +222,3 @@ class Hamrobazaar:
             sleep(2)
             self.driver.quit()
             return condition
-

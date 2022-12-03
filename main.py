@@ -4,7 +4,7 @@ import winsound
 import time
 
 # main URL:
-hamrobazar_url = "https://hamrobazaar.com/category/computers-peripherals/4cce4a7c-431b-474d-8b58-4fd2ddc191cf"
+hamrobazar_url = "https://hamrobazaar.com/category/events-happenings/2bd7c928-9f27-4068-8b44-38530d9b1c49"
 
 # Track the timer:
 start_time = time.time()
@@ -17,7 +17,8 @@ time_interval = 5
 
 category_name = HamrobazarScraper(hamrobazar_url).category_name()
 print(f"Category | {category_name}\n--------------------------------")
-hamrobazar = HamrobazarScraper(hamrobazar_url).hamrobazar_automation(time_interval)
+hamrobazar = HamrobazarScraper(
+    hamrobazar_url).hamrobazar_automation(time_interval)
 
 
 # # Extracting to Json and Excel via Pandas dataframe:
@@ -26,7 +27,6 @@ d = {'Names': hamrobazar[0], "Prices": hamrobazar[1], "Links": hamrobazar[-1]}
 df = pd.DataFrame(data=d)
 df.to_json(f"Sample Hamrobazar {category_name} database.json", indent=4)
 df.to_excel(f"Sample Hamrobazar {category_name} database.xlsx", index=False)
-
 
 
 # Play the sound after the completion of Scraping process:
